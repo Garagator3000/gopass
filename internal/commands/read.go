@@ -11,20 +11,20 @@ import (
 func Read() *cli.Command {
 	return &cli.Command{
 		Name:   "read",
-		Usage:  "Прочитать секрет",
+		Usage:  "Read the secret.",
 		Action: read,
 
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "name",
 				Aliases:  []string{"n"},
-				Usage:    "Название для сохраняемых данных",
+				Usage:    "The name of the secret to be requested.",
 				Required: true,
 			},
 			&cli.StringFlag{
 				Name:        "user",
 				Aliases:     []string{"u"},
-				Usage:       "Имя пользователя от имени, которого хранятся данные.",
+				Usage:       "Username on behalf of which the data is stored.",
 				Required:    false,
 				DefaultText: "",
 			},

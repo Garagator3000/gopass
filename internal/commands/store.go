@@ -14,26 +14,26 @@ import (
 func Store() *cli.Command {
 	return &cli.Command{
 		Name:   "store",
-		Usage:  "Сохранить секрет",
+		Usage:  "Store the secret.",
 		Action: store,
 
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "data",
 				Aliases:  []string{"d"},
-				Usage:    "Данные, которые нужно сохранить",
+				Usage:    "The data to be stored.",
 				Required: true,
 			},
 			&cli.StringFlag{
 				Name:     "name",
 				Aliases:  []string{"n"},
-				Usage:    "Название для сохраняемых данных",
+				Usage:    "The name for the data to be saved.",
 				Required: true,
 			},
 			&cli.StringFlag{
 				Name:        "user",
 				Aliases:     []string{"u"},
-				Usage:       "Имя пользователя от имени, которого хранятся данные.",
+				Usage:       "Username on behalf of which the data is stored.",
 				Required:    false,
 				DefaultText: "",
 			},
