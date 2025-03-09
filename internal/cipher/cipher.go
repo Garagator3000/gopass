@@ -47,6 +47,7 @@ func Decrypt(key string, data string) string {
 		return ""
 	}
 
+	// iv - initialization vector.
 	iv := ciphertext[:aes.BlockSize]
 	ciphertext = ciphertext[aes.BlockSize:]
 
