@@ -20,7 +20,7 @@ func Encrypt(key string, data string) string {
 
 	ciphertext := make([]byte, aes.BlockSize+len(paddedData))
 	iv := ciphertext[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
 		return ""
 	}
 

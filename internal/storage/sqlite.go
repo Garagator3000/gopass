@@ -8,6 +8,7 @@ import (
 
 	"github.com/garagator3000/gopass/internal/entities"
 
+	// Create extension module for sqlite for database/sql.
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -38,7 +39,7 @@ func NewSqlite(dbPath string) *Sqlite {
 		panic(fmt.Errorf("failed to open sqlite db: %w", err))
 	}
 
-	if _, err := db.Exec(createSecretTable); err != nil {
+	if _, err = db.Exec(createSecretTable); err != nil {
 		panic(fmt.Errorf("failed to create db table: %w", err))
 	}
 
@@ -47,21 +48,22 @@ func NewSqlite(dbPath string) *Sqlite {
 	}
 }
 
+//nolint:gosec // Just SQL query template.
 const createSecretSQLite = `
 INSERT INTO secret (name, data, user, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?);
 `
 
-func (s *Sqlite) CreateSecret(ctx context.Context, secret entities.Secret) error {
-	created_at := secret.CreatedAt.UnixNano()
-	updated_at := secret.UpdatedAt.UnixNano()
+func (s *Sqlite) CreateSecret(_ context.Context, secret entities.Secret) error {
+	createdAt := secret.CreatedAt.UnixNano()
+	updatedAt := secret.UpdatedAt.UnixNano()
 
 	_, err := s.db.Exec(createSecretSQLite,
 		secret.Name,
 		secret.Data,
 		secret.User,
-		created_at,
-		updated_at,
+		createdAt,
+		updatedAt,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create secret %s: %w", secret.Name, err)
@@ -70,13 +72,14 @@ func (s *Sqlite) CreateSecret(ctx context.Context, secret entities.Secret) error
 	return nil
 }
 
+//nolint:gosec // Just SQL query template.
 const readSecretSQLite = `
 SELECT data
 FROM secret
 WHERE name = ?;
 `
 
-func (s *Sqlite) ReadSecret(ctx context.Context, name string) (string, error) {
+func (s *Sqlite) ReadSecret(_ context.Context, name string) (string, error) {
 	var data string
 
 	row := s.db.QueryRow(readSecretSQLite, name)
@@ -104,8 +107,8 @@ func setDBPath(dbPath string) (string, error) {
 		return dbPath, nil
 	}
 
-	if err := os.MkdirAll(dirpath, os.ModeDir|os.ModeAppend|os.ModePerm); err != nil {
-		return "", fmt.Errorf("faied to create directory %s: %w", dirpath, err)
+	if mkdirErr := os.MkdirAll(dirpath, os.ModeDir|os.ModeAppend|os.ModePerm); mkdirErr != nil {
+		return "", fmt.Errorf("faied to create directory %s: %w", dirpath, mkdirErr)
 	}
 
 	dbPath = dirpath + "/gopass.sqlite"

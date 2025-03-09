@@ -13,7 +13,7 @@ type Storage interface {
 	Close()
 }
 
-func StorageInit(storageType, storagePath string) Storage {
+func Init(storageType, storagePath string) Storage {
 	switch storageType {
 	case "sqlite":
 		return NewSqlite(storagePath)

@@ -8,26 +8,28 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var Read = &cli.Command{
-	Name:   "read",
-	Usage:  "Прочитать секрет",
-	Action: read,
+func Read() *cli.Command {
+	return &cli.Command{
+		Name:   "read",
+		Usage:  "Прочитать секрет",
+		Action: read,
 
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:     "name",
-			Aliases:  []string{"n"},
-			Usage:    "Название для сохраняемых данных",
-			Required: true,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "name",
+				Aliases:  []string{"n"},
+				Usage:    "Название для сохраняемых данных",
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:        "user",
+				Aliases:     []string{"u"},
+				Usage:       "Имя пользователя от имени, которого хранятся данные.",
+				Required:    false,
+				DefaultText: "",
+			},
 		},
-		&cli.StringFlag{
-			Name:        "user",
-			Aliases:     []string{"u"},
-			Usage:       "Имя пользователя от имени, которого хранятся данные.",
-			Required:    false,
-			DefaultText: "",
-		},
-	},
+	}
 }
 
 func read(ctx *cli.Context) error {
@@ -37,7 +39,7 @@ func read(ctx *cli.Context) error {
 	storageType := ctx.String("storage-type")
 	storagePath := ctx.String("storage-path")
 
-	storage := storage.StorageInit(storageType, storagePath)
+	storage := storage.Init(storageType, storagePath)
 	defer storage.Close()
 
 	encryptedData, err := storage.ReadSecret(ctx.Context, name)
