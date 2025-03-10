@@ -80,6 +80,7 @@ func initApp() *cli.App {
 		Commands: []*cli.Command{
 			commands.Store(),
 			commands.Read(),
+			commands.List(),
 		},
 	}
 }

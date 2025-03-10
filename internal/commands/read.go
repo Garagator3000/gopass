@@ -28,6 +28,13 @@ func Read() *cli.Command {
 				Required:    false,
 				DefaultText: "",
 			},
+			&cli.StringFlag{
+				Name:        "group",
+				Aliases:     []string{"g"},
+				Usage:       "Group of secrets where the data is stored.",
+				Required:    false,
+				DefaultText: "",
+			},
 		},
 	}
 }

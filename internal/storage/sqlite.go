@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/garagator3000/gopass/internal/entities"
 
@@ -28,6 +29,12 @@ created_at INTEGER,
 updated_at INTEGER);
 `
 
+//nolint:gosec // Just SQL query template.
+const addGroupToSecretTable = `
+ALTER TABLE secret
+ADD COLUMN sgroup TEXT;
+`
+
 func NewSqlite(dbPath string) *Sqlite {
 	dbPath, err := setDBPath(dbPath)
 	if err != nil {
@@ -43,6 +50,12 @@ func NewSqlite(dbPath string) *Sqlite {
 		panic(fmt.Errorf("failed to create db table: %w", err))
 	}
 
+	if _, err = db.Exec(addGroupToSecretTable); err != nil {
+		if !strings.Contains(err.Error(), "duplicate column name") {
+			panic(fmt.Errorf("failed to add group column to db table: %w", err))
+		}
+	}
+
 	return &Sqlite{
 		db: db,
 	}
@@ -50,8 +63,8 @@ func NewSqlite(dbPath string) *Sqlite {
 
 //nolint:gosec // Just SQL query template.
 const createSecretSQLite = `
-INSERT INTO secret (name, data, user, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO secret (name, data, user, sgroup, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?);
 `
 
 func (s *Sqlite) CreateSecret(_ context.Context, secret entities.Secret) error {
@@ -62,6 +75,7 @@ func (s *Sqlite) CreateSecret(_ context.Context, secret entities.Secret) error {
 		secret.Name,
 		secret.Data,
 		secret.User,
+		secret.Group,
 		createdAt,
 		updatedAt,
 	)
@@ -87,6 +101,37 @@ func (s *Sqlite) ReadSecret(_ context.Context, name string) (string, error) {
 	err := row.Scan(&data)
 	if err != nil {
 		return "", fmt.Errorf("failed to read secret %s: %w", name, err)
+	}
+
+	return data, nil
+}
+
+//nolint:gosec // Just SQL query template.
+const listSecretSQLite = `
+SELECT data
+FROM secret
+WHERE sgroup = ?;
+`
+
+func (s *Sqlite) ListSecret(_ context.Context, groupname string) ([]string, error) {
+	var data []string
+
+	rows, err := s.db.Query(listSecretSQLite, groupname)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list secrets in group %s: %w", groupname, err)
+	}
+	defer rows.Close()
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("failed to fetch rows: %w", rows.Err())
+	}
+
+	for rows.Next() {
+		var secretData string
+		if scanErr := rows.Scan(&secretData); scanErr != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", scanErr)
+		}
+		data = append(data, secretData)
 	}
 
 	return data, nil

@@ -37,6 +37,13 @@ func Store() *cli.Command {
 				Required:    false,
 				DefaultText: "",
 			},
+			&cli.StringFlag{
+				Name:        "group",
+				Aliases:     []string{"g"},
+				Usage:       "Group of secrets wich the data will be stored.",
+				Required:    false,
+				DefaultText: "",
+			},
 		},
 	}
 }
@@ -62,6 +69,7 @@ func formSecret(ctx *cli.Context) entities.Secret {
 
 	name := ctx.String("name")
 	data := ctx.String("data")
+	group := ctx.String("group")
 
 	encodedSecret := cipher.Encrypt(key, data)
 
@@ -78,6 +86,7 @@ func formSecret(ctx *cli.Context) entities.Secret {
 		Name:      name,
 		Data:      encodedSecret,
 		User:      user,
+		Group:     group,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

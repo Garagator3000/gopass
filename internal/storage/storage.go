@@ -9,6 +9,7 @@ import (
 type Storage interface {
 	CreateSecret(ctx context.Context, secret entities.Secret) error
 	ReadSecret(ctx context.Context, name string) (string, error)
+	ListSecret(ctx context.Context, groupname string) ([]string, error)
 
 	Close()
 }
