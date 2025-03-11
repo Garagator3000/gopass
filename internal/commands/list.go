@@ -36,11 +36,11 @@ func list(ctx *cli.Context) error {
 
 	fmt.Printf("%s:\n", groupname)
 	for _, encrypted := range encryptedData {
-		data := cipher.Decrypt(key, encrypted)
+		data := cipher.Decrypt(key, encrypted.Data)
 		if data == "" {
 			continue
 		}
-		fmt.Printf("  %s\n", cipher.Decrypt(key, encrypted))
+		fmt.Printf("  %s: %s\n", encrypted.Name, data)
 	}
 
 	return nil

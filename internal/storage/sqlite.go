@@ -108,13 +108,13 @@ func (s *Sqlite) ReadSecret(_ context.Context, name string) (string, error) {
 
 //nolint:gosec // Just SQL query template.
 const listSecretSQLite = `
-SELECT data
+SELECT name, data
 FROM secret
 WHERE sgroup = ?;
 `
 
-func (s *Sqlite) ListSecret(_ context.Context, groupname string) ([]string, error) {
-	var data []string
+func (s *Sqlite) ListSecret(_ context.Context, groupname string) ([]entities.Secret, error) {
+	var secrets []entities.Secret
 
 	rows, err := s.db.Query(listSecretSQLite, groupname)
 	if err != nil {
@@ -127,14 +127,14 @@ func (s *Sqlite) ListSecret(_ context.Context, groupname string) ([]string, erro
 	}
 
 	for rows.Next() {
-		var secretData string
-		if scanErr := rows.Scan(&secretData); scanErr != nil {
+		var secretName, secretData string
+		if scanErr := rows.Scan(&secretName, &secretData); scanErr != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", scanErr)
 		}
-		data = append(data, secretData)
+		secrets = append(secrets, entities.Secret{Name: secretName, Data: secretData})
 	}
 
-	return data, nil
+	return secrets, nil
 }
 
 func (s *Sqlite) Close() {
